@@ -2,6 +2,9 @@
 name = "zermelo-cli"
 version = "0.1.0"
 edition = "2021"
+description = "A cli to get your schedule of the current day built with rust"
+license-file = "LICENSE"
+repository = "https://github.com/IkBenOlie5/zermelo-cli"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
