@@ -1,0 +1,12 @@
+[package]
+name = "zermelo-cli"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+reqwest = {version = "0.11.9", features = ["json", "blocking"]}
+serde = {version = "1.0.136", features = ["derive"]}
+chrono = "0.4.19"
+colored = "2.0.0"
