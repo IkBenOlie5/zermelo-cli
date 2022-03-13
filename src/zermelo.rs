@@ -1,7 +1,8 @@
-use chrono::{DateTime, Datelike, Local, NaiveDate};
+use chrono::{DateTime, Datelike, Local, NaiveDate, NaiveDateTime};
+use colored::Colorize;
 use reqwest::blocking::Client;
 use serde::Deserialize;
-use std::error::Error;
+use std::{error::Error, fmt};
 
 #[derive(Deserialize)]
 struct AppointmentsResponse {
@@ -16,16 +17,38 @@ struct AppointmentsData {
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Appointment {
-    pub start: i64,
-    pub end: i64,
-    pub subjects: Vec<String>,
-    pub teachers: Vec<String>,
-    pub groups: Vec<String>,
-    pub locations: Vec<String>,
-    pub cancelled: bool,
+    start: i64,
+    end: i64,
+    subjects: Vec<String>,
+    teachers: Vec<String>,
+    groups: Vec<String>,
+    locations: Vec<String>,
+    cancelled: bool,
 }
 
+impl fmt::Display for Appointment {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let offset = *Local::now().offset();
+        let start =
+            DateTime::<Local>::from_utc(NaiveDateTime::from_timestamp(self.start, 0), offset);
+        let end = DateTime::<Local>::from_utc(NaiveDateTime::from_timestamp(self.end, 0), offset);
 
+        let mut s = format!(
+            "    {} - {} - {} - {} - ({}-{})",
+            self.subjects.join(", ").bright_blue(),
+            self.teachers.join(", ").bright_red(),
+            self.groups.join(", ").bright_green(),
+            self.locations.join(", ").bright_yellow(),
+            start.format("%H:%M").to_string().bright_cyan(),
+            end.format("%H:%M").to_string().bright_magenta(),
+        );
+
+        if self.cancelled {
+            s = s.on_red().to_string();
+        }
+        write!(f, "{}", s)
+    }
+}
 
 #[derive(Deserialize)]
 struct AuthResponse {
@@ -39,6 +62,14 @@ pub struct Zermelo {
 }
 
 impl Zermelo {
+    pub fn new(access_token: &str, school: &str) -> Self {
+        Zermelo {
+            url: format!("https://{}.zportal.nl/api/v3", school),
+            client: Client::new(),
+            access_token: access_token.to_string(),
+        }
+    }
+
     pub fn from_code(code: &str, school: &str) -> Result<Self, Box<dyn Error>> {
         let client = Client::new();
         let url = format!("https://{}.zportal.nl/api/v3", school);
@@ -56,14 +87,6 @@ impl Zermelo {
             client,
             access_token: res.json::<AuthResponse>()?.access_token,
         })
-    }
-
-    pub fn from_access_token(access_token: &str, school: &str) -> Self {
-        Zermelo {
-            url: format!("https://{}.zportal.nl/api/v3", school),
-            client: Client::new(),
-            access_token: access_token.to_string(),
-        }
     }
 
     pub fn get_appointments(&self) -> Result<Vec<Appointment>, Box<dyn Error>> {
@@ -85,6 +108,8 @@ impl Zermelo {
             .send()?
             .error_for_status()?;
 
-        Ok(res.json::<AppointmentsResponse>()?.response.data)
+        let mut appointments = res.json::<AppointmentsResponse>()?.response.data;
+        appointments.sort_by(|a, b| a.start.cmp(&b.start));
+        Ok(appointments)
     }
 }
