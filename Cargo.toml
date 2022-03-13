@@ -1,6 +1,6 @@
 [package]
 name = "zermelo-cli"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "A cli to get your schedule of the current day built with rust"
 license = "BSD-3-Clause"
