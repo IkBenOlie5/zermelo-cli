@@ -52,17 +52,18 @@ fn main() {
 }
 
 fn print_help() {
-    println!("zermelo-cli\n");
-    println!("USAGE:");
-    println!("   zermelo-cli [FLAG] [ACCESS TOKEN] <SCHOOL>\n");
-    println!("FLAGS:");
+    println!("zermelo-cli {}", env!("CARGO_PKG_VERSION"));
+    println!("{}", env!("CARGO_PKG_DESCRIPTION"));
+    println!("\nUSAGE:");
+    println!("   zermelo-cli [FLAG] [ACCESS TOKEN] <SCHOOL>");
+    println!("\nFLAGS:");
     println!("    -h, --help                           Prints this message");
     println!("    -V, --version                        Prints version information");
     println!("    -c, --code <CODE>                    Uses the code to fetch the access token");
-    println!("ARGS:");
-    println!("    [ACCESS TOKEN]    The access token to get the appointments with (if -c or --code in specified, this is optional)\n");
-    println!("    <SCHOOL>          The school to get appointments from\n");
-    println!("EXAMPLES:");
+    println!("\nARGS:");
+    println!("    [ACCESS TOKEN]    The access token to get the appointments with (if -c or --code in specified, this is optional)");
+    println!("    <SCHOOL>          The school to get appointments from");
+    println!("\nEXAMPLES:");
     println!("    zermelo-cli -c 123456789101 cgu");
     println!("    zermelo-cli fajsidu29dj2jdmv0sjsj2jd8d usg");
 }
