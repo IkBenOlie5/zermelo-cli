@@ -1,53 +1,44 @@
 pub struct Config {
-    pub code: Option<String>,
-    pub access_token: Option<String>,
     pub school: String,
+    pub use_code: bool,
+    pub auth: String, // this can be the code or the access token
 }
 
 impl Config {
-    pub fn new(mut args: std::env::Args) -> Result<Config, &'static str> {
-        args.next();
-
-        match args.next() {
-            Some(flag) => {
-                if flag == "-c" || flag == "--code" {
-                    let code = match args.next() {
-                        Some(code) => code,
-                        None => return Err("No code provided"),
-                    };
-                    let school = match args.next() {
-                        Some(school) => school,
-                        None => return Err("No school provided"),
-                    };
+    pub fn new(args: &[String]) -> Result<Self, &'static str> {
+        match args[1].as_str() {
+            "-h" | "--help" => Err("help"),
+            "-V" | "--version" => Err("version"),
+            "-c" | "--code" => {
+                if args.len() < 4 {
+                    Err("not enough arguments")
+                } else if args.len() > 4{
+                    Err("too many arguments")
+                }
+                
+                else {
                     Ok(Config {
-                        code: Some(code),
-                        access_token: None,
-                        school,
+                        school: args[3].clone(),
+                        use_code: true,
+                        auth: args[2].clone(),
                     })
-                } else if flag == "-a" || flag == "--access-token" {
-                    let access_token = match args.next() {
-                        Some(access_token) => access_token,
-                        None => return Err("No access token provided"),
-                    };
-                    let school = match args.next() {
-                        Some(school) => school,
-                        None => return Err("No school provided"),
-                    };
-
-                    Ok(Config {
-                        code: None,
-                        access_token: access_token.into(),
-                        school,
-                    })
-                } else if flag == "-h" || flag == "--help" {
-                    Err("help")
-                } else if flag == "-V" || flag == "--version" {
-                    Err("version")
-                } else {
-                    Err("Invalid flag")
                 }
             }
-            None => Err("help"),
+            _ => {
+                if args.len() < 3 {
+                    Err("not enough arguments")
+                } else if args.len() > 3 {
+                    Err("too many arguments")
+                }
+                
+                else {
+                    Ok(Config {
+                        school: args[2].clone(),
+                        use_code: false,
+                        auth: args[1].clone(),
+                    })
+                }
+            }
         }
     }
 }

@@ -13,8 +13,8 @@ use zermelo::{Appointment, Zermelo};
 fn main() {
     println!("Good morning! 👋");
 
-    let args = env::args();
-    let config = Config::new(args).unwrap_or_else(|e| {
+    let args = env::args().collect::<Vec<String>>();
+    let config = Config::new(&args).unwrap_or_else(|e| {
         if e == "help" {
             print_help();
             exit(0);
@@ -28,19 +28,22 @@ fn main() {
     });
 
     let zermelo;
-    if let Some(access_token) = config.access_token {
-        zermelo = Zermelo::new(&access_token, &config.school);
-    } else {
-        zermelo = Zermelo::from_code(&config.code.unwrap(), &config.school).unwrap_or_else(|e| {
+
+    if config.use_code {
+        zermelo = Zermelo::from_code(&config.auth, &config.school).unwrap_or_else(|e| {
             eprintln!("❌ Error getting access token: `{}`", e);
             exit(1)
         });
-
-        println!("Access token is: `{}`. You can use this instead of the code with the -a|--access-token flag", zermelo.access_token);
+        println!(
+            "Access token is: `{}`, you can use it instead of the code next time",
+            zermelo.access_token
+        );
+    } else {
+        zermelo = Zermelo::new(&config.auth, &config.school);
     }
 
     let appointments = zermelo.get_appointments().unwrap_or_else(|e| {
-        eprintln!("Error getting appointments: `{}`", e);
+        eprintln!("❌ Error getting appointments: `{}`", e);
         exit(1)
     });
     print_appointments(&appointments);
@@ -51,19 +54,17 @@ fn main() {
 fn print_help() {
     println!("zermelo-cli\n");
     println!("USAGE:");
-    println!("   zermelo-cli <FLAG> <CODE OR ACCESS TOKEN> <SCHOOL>\n");
+    println!("   zermelo-cli [FLAG] [ACCESS TOKEN] <SCHOOL>\n");
     println!("FLAGS:");
     println!("    -h, --help                           Prints this message");
     println!("    -V, --version                        Prints version information");
-    println!(
-        "    -c, --code <CODE>                    Uses the provided code to fetch the access token"
-    );
-    println!("    -a, --access-token <ACCESS_TOKEN>    Uses the provided access token\n");
+    println!("    -c, --code <CODE>                    Uses the code to fetch the access token");
     println!("ARGS:");
-    println!("    <SCHOOL>    The school to get appointments from\n");
+    println!("    [ACCESS TOKEN]    The access token to get the appointments with (if -c or --code in specified, this is optional)\n");
+    println!("    <SCHOOL>          The school to get appointments from\n");
     println!("EXAMPLES:");
     println!("    zermelo-cli -c 123456789101 cgu");
-    println!("    zermelo-cli -a fajsidu29dj2jdmv0sjsj2jd8d usg");
+    println!("    zermelo-cli fajsidu29dj2jdmv0sjsj2jd8d usg");
 }
 
 fn print_appointments(appointments: &[Appointment]) {

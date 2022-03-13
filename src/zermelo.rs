@@ -77,10 +77,8 @@ impl Zermelo {
         let res = client
             .post(format!("{}/oauth/token", url))
             .form(&[("grant_type", "authorization_code"), ("code", code)])
-            .send()
-            .unwrap()
-            .error_for_status()
-            .unwrap();
+            .send()?
+            .error_for_status()?;
 
         Ok(Zermelo {
             url,
