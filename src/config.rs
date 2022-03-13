@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 pub struct Config {
     pub school: String,
     pub use_code: bool,
@@ -14,32 +16,24 @@ impl Config {
         match args[1].as_str() {
             "-h" | "--help" => Err("help"),
             "-V" | "--version" => Err("version"),
-            "-c" | "--code" => {
-                if args.len() < 4 {
-                    Err("not enough arguments")
-                } else if args.len() > 4 {
-                    Err("too many arguments")
-                } else {
-                    Ok(Config {
-                        school: args[3].clone(),
-                        use_code: true,
-                        auth: args[2].clone(),
-                    })
-                }
-            }
-            _ => {
-                if args.len() < 3 {
-                    Err("not enough arguments")
-                } else if args.len() > 3 {
-                    Err("too many arguments")
-                } else {
-                    Ok(Config {
-                        school: args[2].clone(),
-                        use_code: false,
-                        auth: args[1].clone(),
-                    })
-                }
-            }
+            "-c" | "--code" => match args.len().cmp(&4) {
+                Ordering::Less => Err("not enough arguments"),
+                Ordering::Greater => Err("too many arguments"),
+                Ordering::Equal => Ok(Config {
+                    school: args[3].clone(),
+                    use_code: true,
+                    auth: args[2].clone(),
+                }),
+            },
+            _ => match args.len().cmp(&3) {
+                Ordering::Less => Err("not enough arguments"),
+                Ordering::Greater => Err("too many arguments"),
+                Ordering::Equal => Ok(Config {
+                    school: args[2].clone(),
+                    use_code: false,
+                    auth: args[1].clone(),
+                }),
+            },
         }
     }
 }
