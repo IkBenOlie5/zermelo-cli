@@ -6,17 +6,20 @@ pub struct Config {
 
 impl Config {
     pub fn new(args: &[String]) -> Result<Self, &'static str> {
+        if args.len() == 1 {
+            // no arguments
+            return Err("help");
+        }
+
         match args[1].as_str() {
             "-h" | "--help" => Err("help"),
             "-V" | "--version" => Err("version"),
             "-c" | "--code" => {
                 if args.len() < 4 {
                     Err("not enough arguments")
-                } else if args.len() > 4{
+                } else if args.len() > 4 {
                     Err("too many arguments")
-                }
-                
-                else {
+                } else {
                     Ok(Config {
                         school: args[3].clone(),
                         use_code: true,
@@ -29,9 +32,7 @@ impl Config {
                     Err("not enough arguments")
                 } else if args.len() > 3 {
                     Err("too many arguments")
-                }
-                
-                else {
+                } else {
                     Ok(Config {
                         school: args[2].clone(),
                         use_code: false,
