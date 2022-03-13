@@ -19,7 +19,7 @@ fn main() {
             print_help();
             exit(0);
         } else if e == "version" {
-            println!("Version: 0.1.1");
+            println!("Version: {}", env!("CARGO_PKG_VERSION"));
             exit(0);
         } else {
             eprintln!("❌ Error parsing arguments: {}", e);
